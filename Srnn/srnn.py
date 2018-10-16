@@ -29,7 +29,7 @@ Y = df.stars.values - 1
 Y = to_categorical(Y, num_classes=5)
 X = df.text.values
 
-# set hyper paramters
+# set hyper parameters
 MAX_NUM_WORDS = 30000
 EMBEDDING_DIM = 200
 VALIDATION_SPLIT = 0.1
@@ -47,8 +47,8 @@ X = X[indices]
 Y = Y[indices]
 
 # training set validation set and test set
-nb_validation_samples_val = int((VALIDATION_SPLIT+TEST_SPLIT)*X.shape[0])
-nb_validation_samples_test = int(TEST_SPLIT*X.shape[0])
+nb_validation_samples_val = int((VALIDATION_SPLIT + TEST_SPLIT) * X.shape[0])
+nb_validation_samples_test = int(TEST_SPLIT * X.shape[0])
 
 x_train = X[:-nb_validation_samples_val]
 y_train = Y[:-nb_validation_samples_val]
@@ -57,7 +57,7 @@ y_val = Y[:-nb_validation_samples_val:-nb_validation_samples_test]
 x_test = X[-nb_validation_samples_test:]
 y_test = Y[-nb_validation_samples_test:]
 
-# use tokenizer to bulid vocab
+# use tokenizer to build vocab
 tokenizer1 = Tokenizer(num_words=MAX_NUM_WORDS)
 tokenizer1.fit_on_texts(df.text)
 vocab = tokenizer1.word_index
@@ -112,15 +112,63 @@ with open(glove_path, "r") as f:
 print("found {} word vectors".format(len(embeddings_index)))
 
 # use pre-trained glove word embeddings to initialize the embedding layer
-embeddings_matrix = np.random.random((MAX_NUM_WORDS+1, EMBEDDING_DIM))
+embedding_matrix = np.random.random((MAX_NUM_WORDS + 1, EMBEDDING_DIM))
 for word, i in vocab.items():
     if i < MAX_NUM_WORDS:
-        embeddings_vector = embeddings_index.get(word)
+        embedding_vector = embeddings_index.get(word)
         # words not found in embedding index will be random initialized.
-        if embeddings_vector:
-            embeddings_matrix[i] = embeddings_vector
+        if embedding_vector:
+            embedding_matrix[i] = embedding_vector
 
-embeddings_layer = Embedding(MAX_NUM_WORDS+1, EMBEDDING_DIM, weights=[embeddings_matrix],
-                             input_length=MAX_LEN/64, trainable=True)
+embedding_layer = Embedding(MAX_NUM_WORDS + 1, EMBEDDING_DIM, weights=[embedding_matrix],
+                            input_length=MAX_LEN / 64, trainable=True)
 
 # build model
+print("build model")
+input1 = Input(shape=(MAX_LEN / 64,), dtype="int32")
+embed = embedding_layer(input1)
+gru1 = GRU(NUM_FILTERS, recurrent_activation="sigmoid", activation=None, return_sequences=False)(embed)
+Encoder1 = Model(input1, gru1)
+
+input2 = Input(shape=(8, MAX_LEN / 64,), dtype="int32")
+embed2 = embedding_layer(input2)
+gru2 = GRU(NUM_FILTERS, recurrent_activation="sigmoid", activation=None, return_sequences=False)(embed2)
+Encoder2 = Model(input2, gru2)
+
+input3 = Input(shape=(8, 8, MAX_LEN / 64,), dtype="int32")
+embed3 = embedding_layer(input3)
+gru3 = GRU(NUM_FILTERS, recurrent_activation="sigmoid", activation=None, return_sequences=False)(embed3)
+preds = Dense(5, activation="softmax")(gru3)
+model = Model(input3, preds)
+
+print(Encoder1.summary())
+print(Encoder2.summary())
+print(model.summary())
+
+# use adam optimizer
+from keras.optimizers import Adam
+
+opt = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
+
+model.compile(loss="categorical_crossentropy", optimizer=opt, metrics=["acc"])
+
+# save the best model on validation set
+from keras.callbacks import ModelCheckpoint
+
+savebestmodel = "save_model/SRNN(8,2)_yelp2013.h5"
+checkpoint = ModelCheckpoint(savebestmodel, monitor="val_acc", verbose=1, save_best_only=True, mode="max")
+callbacks = [checkpoint]
+
+model.fit(np.array(x_train_padded_seqs_split), y_train,
+          validation_data=(np.array(x_val_padded_seqs_split), y_val),
+          nb_epoch=EPOCHS,
+          batch_size=Batch_size,
+          callbacks=callbacks, verbose=1
+          )
+
+# use best model to evaluate on test set
+from keras.models import load_model
+
+
+best_model = load_model(savebestmodel)
+print(best_model.evaluate(np.array(x_test_padded_seqs_split), y_test, batch_size=Batch_size))
