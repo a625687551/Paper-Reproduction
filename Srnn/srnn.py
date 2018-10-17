@@ -10,7 +10,9 @@ https://figshare.com/articles/Yelp_2013/6292142
 https://figshare.com/articles/Untitled_Item/6292253 
 https://figshare.com/articles/Yelp_2015/6292334 
 Yelp_P, Amazon_P and Amazon_F datasets are at: 
-https://drive.google.com/drive/folders/0Bz8a_Dbh9Qhbfll6bVpmNUtUcFdjYmF2SEpmZUZUcVNiMUw1TWN6RDV3a0JHT3kxLVhVR2M 
+https://drive.google.com/drive/folders/0Bz8a_Dbh9Qhbfll6bVpmNUtUcFdjYmF2SEpmZUZUcVNiMUw1TWN6RDV3a0JHT3kxLVhVR2M
+Use tensorflow gpu 1.4.1 with keras 2.1.5, CUDA 8, CUDNN 7
+If your GPU is not compatible with CUDA 8 just try using keras 2.1.5, it solved my problem!
 """
 import pandas as pd
 import numpy as np
@@ -45,7 +47,7 @@ np.random.seed(2018)
 np.random.shuffle(indices)
 X = X[indices]
 Y = Y[indices]
-
+print(len(X), len(Y))
 # training set validation set and test set
 nb_validation_samples_val = int((VALIDATION_SPLIT + TEST_SPLIT) * X.shape[0])
 nb_validation_samples_test = int(TEST_SPLIT * X.shape[0])
@@ -53,7 +55,7 @@ nb_validation_samples_test = int(TEST_SPLIT * X.shape[0])
 x_train = X[:-nb_validation_samples_val]
 y_train = Y[:-nb_validation_samples_val]
 x_val = X[-nb_validation_samples_val:-nb_validation_samples_test]
-y_val = Y[:-nb_validation_samples_val:-nb_validation_samples_test]
+y_val = Y[-nb_validation_samples_val:-nb_validation_samples_test]
 x_test = X[-nb_validation_samples_test:]
 y_test = Y[-nb_validation_samples_test:]
 
@@ -99,21 +101,21 @@ for i in range(x_val_padded_seqs.shape[0]):
         a.append(s)
     x_val_padded_seqs_split.append(a)
 
-print(x_train_padded_seqs_split[:3])
-print(x_test_padded_seqs_split[:3])
-print(x_val_padded_seqs_split[:3])
+# print(x_train_padded_seqs_split[:3])
+# print(x_test_padded_seqs_split[:3])
+# print(x_val_padded_seqs_split[:3])
 
 # load pre-trained GLove word embeddings
 print("using Glove embeddings")
 glove_path = "glove.6B.200d.txt"
 embeddings_index = {}
-with open(glove_path, "r", encoding="utf-8") as f:
+with open(glove_path, "r") as f:
     for line in f:
         values = line.split()
         word = values[0]
         coefs = np.asarray(values[1:], dtype="float32")
         embeddings_index[word] = coefs
-print(embeddings_index[:1])
+# print(embeddings_index[:1])
 print("found {} word vectors".format(len(embeddings_index)))
 
 # use pre-trained glove word embeddings to initialize the embedding layer
@@ -164,6 +166,10 @@ savebestmodel = "save_model/SRNN(8,2)_yelp2013.h5"
 checkpoint = ModelCheckpoint(savebestmodel, monitor="val_acc", verbose=1, save_best_only=True, mode="max")
 callbacks = [checkpoint]
 
+print(len(y_val), len(x_val_padded_seqs_split))
+print(len(y_test), len(x_test_padded_seqs_split))
+print(len(y_train), len(x_train_padded_seqs_split))
+
 model.fit(x=np.array(x_train_padded_seqs_split), y=y_train,
           validation_data=(np.array(x_val_padded_seqs_split), y_val),
           epochs=EPOCHS,
@@ -172,7 +178,6 @@ model.fit(x=np.array(x_train_padded_seqs_split), y=y_train,
 
 # use best model to evaluate on test set
 from keras.models import load_model
-
 
 best_model = load_model(savebestmodel)
 print(best_model.evaluate(np.array(x_test_padded_seqs_split), y_test, batch_size=Batch_size))
