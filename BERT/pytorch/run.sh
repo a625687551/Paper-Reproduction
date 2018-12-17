@@ -1,12 +1,12 @@
 
 
-#export GLUE_DIR=/search/odin/wuyonggang/bert/extract_code/glue_data
-#export BERT_BASE_DIR=/search/odin/wuyonggang/bert/chinese_L-12_H-768_A-12/
-#export BERT_PYTORCH_DIR=/search/odin/wuyonggang/bert/chinese_L-12_H-768_A-12/
+export GLUE_DIR=G:/Python/Paper-Reproduction/BERT/pytorch/glue_data
+export BERT_BASE_DIR=G:/Python/Paper-Reproduction/BERT/pytorch/chinese_L-12_H-768_A-12/
+export BERT_PYTORCH_DIR=G:/Python/Paper-Reproduction/BERT/pytorch/chinese_L-12_H-768_A-12/
 
-export GLUE_DIR=/home/liuhongyu/wang/paper/BERT/pytorch/glue_data
-export BERT_BASE_DIR=/home/liuhongyu/wang/paper/BERT/pytorch/chinese_L-12_H-768_A-12/
-export BERT_PYTORCH_DIR=/home/liuhongyu/wang/paper/BERT/pytorch/chinese_L-12_H-768_A-12/
+#export GLUE_DIR=/home/liuhongyu/wang/paper/BERT/pytorch/glue_data
+#export BERT_BASE_DIR=/home/liuhongyu/wang/paper/BERT/pytorch/chinese_L-12_H-768_A-12/
+#export BERT_PYTORCH_DIR=/home/liuhongyu/wang/paper/BERT/pytorch/chinese_L-12_H-768_A-12/
 
 python run_classifier_word.py \
   --task_name NEWS \
@@ -21,7 +21,7 @@ python run_classifier_word.py \
   --learning_rate 2e-5 \
   --num_train_epochs 3.0 \
   --output_dir ./newsAll_output/ \
-  --local_rank 3
+  --local_rank -1
 
 #python run_classifier_word.py \
 #  --task_name NEWS \
