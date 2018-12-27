@@ -11,8 +11,9 @@ https://figshare.com/articles/Untitled_Item/6292253
 https://figshare.com/articles/Yelp_2015/6292334 
 Yelp_P, Amazon_P and Amazon_F datasets are at: 
 https://drive.google.com/drive/folders/0Bz8a_Dbh9Qhbfll6bVpmNUtUcFdjYmF2SEpmZUZUcVNiMUw1TWN6RDV3a0JHT3kxLVhVR2M
-Use tensorflow gpu 1.4.1 with keras 2.1.5, CUDA 8, CUDNN 7
+Use tensorflow gpu 1.4.1 with keras 2.1.5 numpy=1.15 h5py=2.8.0, python 2.7
 If your GPU is not compatible with CUDA 8 just try using keras 2.1.5, it solved my problem!
+Use tensorflow gpu 1.10.0 with keras 2.2.4 numpy=1.15 h5py=2.8.0, python 3.6(gpu or not both ok)
 """
 import pandas as pd
 import numpy as np
@@ -24,6 +25,8 @@ from keras.models import Model
 from keras.layers import Input, Embedding, GRU, TimeDistributed, Dense
 
 # load data
+# Using TensorFlow backend.
+# [0.7554654092092673, 0.6680324381862092]
 df = pd.read_csv("yelp_2013.csv")
 # df.sample(5000)
 
@@ -109,7 +112,7 @@ for i in range(x_val_padded_seqs.shape[0]):
 print("using Glove embeddings")
 glove_path = "glove.6B.200d.txt"
 embeddings_index = {}
-with open(glove_path, "r") as f:
+with open(glove_path, "r", encoding="utf-8") as f:
     for line in f:
         values = line.split()
         word = values[0]

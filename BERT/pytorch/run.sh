@@ -1,4 +1,4 @@
-
+#!/usr/bin/env bash
 
 export GLUE_DIR=G:/Python/Paper-Reproduction/BERT/pytorch/glue_data
 export BERT_BASE_DIR=G:/Python/Paper-Reproduction/BERT/pytorch/chinese_L-12_H-768_A-12/
@@ -16,8 +16,8 @@ python run_classifier_word.py \
   --vocab_file $BERT_BASE_DIR/vocab.txt \
   --bert_config_file $BERT_BASE_DIR/bert_config.json \
   --init_checkpoint $BERT_PYTORCH_DIR/pytorch_model.bin \
-  --max_seq_length 256 \
-  --train_batch_size 32 \
+  --max_seq_length 64 \
+  --train_batch_size 16 \
   --learning_rate 2e-5 \
   --num_train_epochs 3.0 \
   --output_dir ./newsAll_output/ \
