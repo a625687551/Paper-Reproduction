@@ -93,7 +93,7 @@ class DataProcessor(object):
         file_in = open(input_file, "rb")
         lines = []
         for line in file_in:
-            lines.append(line.decode("gb18030").split("\t"))
+            lines.append(line.decode("utf-8").split("\t"))
         return lines
 
 
@@ -376,7 +376,7 @@ def set_optimizer_params_grad(named_params_optimizer, named_params_model, test_n
 def main():
     parser = argparse.ArgumentParser()
 
-    ## Required parameters
+    # Required parameters
     parser.add_argument("--data_dir",
                         default=None,
                         type=str,
@@ -404,7 +404,7 @@ def main():
                         required=True,
                         help="The output directory where the model checkpoints will be written.")
 
-    ## Other parameters
+    # Other parameters
     parser.add_argument("--init_checkpoint",
                         default=None,
                         type=str,

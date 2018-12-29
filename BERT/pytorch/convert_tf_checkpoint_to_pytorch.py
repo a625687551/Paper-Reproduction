@@ -28,7 +28,7 @@ from modeling import BertConfig, BertModel
 
 parser = argparse.ArgumentParser()
 
-## Required parameters
+# Required parameters
 parser.add_argument("--tf_checkpoint_path",
                     default=None,
                     type=str,
