@@ -529,7 +529,6 @@ def main():
         device = torch.device("cuda" if torch.cuda.is_available() and not args.no_cuda else "cpu")
         n_gpu = torch.cuda.device_count()
     else:
-        print("ggggg")
         device = torch.device("cuda", args.local_rank)
         n_gpu = 1
         # Initializes the distributed backend which will take care of sychronizing nodes/GPUs
@@ -601,11 +600,11 @@ def main():
 
     # Prepare optimizer
     if args.fp16:
-        param_optimizer = [(n, param.clone().detach().to('cpu').float().requires_grad_()) \
-                           for n, param in model.named_parameters()]
+        param_optimizer = [(n, param.clone().detach().to('cpu').float().requires_grad_()) for n, param in
+                           model.named_parameters()]
     elif args.optimize_on_cpu:
-        param_optimizer = [(n, param.clone().detach().to('cpu').requires_grad_()) \
-                           for n, param in model.named_parameters()]
+        param_optimizer = [(n, param.clone().detach().to('cpu').requires_grad_()) for n, param in
+                           model.named_parameters()]
     else:
         param_optimizer = list(model.named_parameters())
     no_decay = ['bias', 'gamma', 'beta']
@@ -620,8 +619,7 @@ def main():
 
     global_step = 0
     if args.do_train:
-        train_features = convert_examples_to_features(
-            train_examples, label_list, args.max_seq_length, tokenizer)
+        train_features = convert_examples_to_features(train_examples, label_list, args.max_seq_length, tokenizer)
         logger.info("***** Running training *****")
         logger.info("  Num examples = %d", len(train_examples))
         logger.info("  Batch size = %d", args.train_batch_size)
@@ -637,13 +635,13 @@ def main():
 
             train_sampler = RandomSampler(train_data)
             # train_sampler = DistributedSampler(train_data)
-        train_dataloader = DataLoader(train_data, sampler=train_sampler, batch_size=args.train_batch_size)
+        train_data_loader = DataLoader(train_data, sampler=train_sampler, batch_size=args.train_batch_size)
 
         model.train()
         for _ in trange(int(args.num_train_epochs), desc="Epoch"):
             tr_loss = 0
             nb_tr_examples, nb_tr_steps = 0, 0
-            for step, batch in enumerate(tqdm(train_dataloader, desc="Iteration")):
+            for step, batch in enumerate(tqdm(train_data_loader, desc="Iteration")):
                 batch = tuple(t.to(device) for t in batch)
                 input_ids, input_mask, segment_ids, label_ids = batch
                 loss, _ = model(input_ids, segment_ids, input_mask, label_ids)
@@ -677,11 +675,11 @@ def main():
                         optimizer.step()
                     model.zero_grad()
                     global_step += 1
+        torch.save(model.state_dict(), os.path.join(args.output_dir, "model.pkl"))
 
     if args.do_eval:
         eval_examples = processor.get_dev_examples(args.data_dir)
-        eval_features = convert_examples_to_features(
-            eval_examples, label_list, args.max_seq_length, tokenizer)
+        eval_features = convert_examples_to_features(eval_examples, label_list, args.max_seq_length, tokenizer)
         logger.info("***** Running evaluation *****")
         logger.info("  Num examples = %d", len(eval_examples))
         logger.info("  Batch size = %d", args.eval_batch_size)
@@ -693,7 +691,6 @@ def main():
         if args.local_rank == -1:
             eval_sampler = SequentialSampler(eval_data)
         else:
-
             eval_sampler = SequentialSampler(eval_data)
             # eval_sampler = DistributedSampler(eval_data)
         eval_dataloader = DataLoader(eval_data, sampler=eval_sampler, batch_size=args.eval_batch_size)
