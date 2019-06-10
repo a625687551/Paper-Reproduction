@@ -1,11 +1,12 @@
-'''
+# -*- coding:utf-8 -*-
+"""
 Author: Zeping Yu
-Sliced Recurrent Neural Network (SRNN). 
+Sliced Recurrent Neural Network (SRNN).
 SRNN is able to get much faster speed than standard RNN by slicing the sequences into many subsequences.
 This work is accepted by COLING 2018.
 The code is written in keras, using tensorflow backend. We implement the SRNN(8,2) here, and Yelp 2013 dataset is used.
 If you have any question, please contact me at zepingyu@foxmail.com.
-'''
+"""
 
 import pandas as pd
 import numpy as np
@@ -131,17 +132,20 @@ print("Build Model")
 
 input1 = Input(shape=(MAX_LEN / 64,), dtype="float32")
 embed = embedding_layer(input1)
-gru1 = GRU(NUM_FILTERS, recurrent_activation='sigmoid', activation=None, return_sequences=False)(embed)
+gru1 = GRU(NUM_FILTERS, recurrent_activation='sigmoid', activation=None,
+           return_sequences=False)(embed)
 Encoder1 = Model(input1, gru1)
 
 input2 = Input(shape=(8, MAX_LEN / 64,), dtype="float32")
 embed2 = TimeDistributed(Encoder1)(input2)
-gru2 = GRU(NUM_FILTERS, recurrent_activation='sigmoid', activation=None, return_sequences=False)(embed2)
+gru2 = GRU(NUM_FILTERS, recurrent_activation='sigmoid', activation=None,
+           return_sequences=False)(embed2)
 Encoder2 = Model(input2, gru2)
 
 input3 = Input(shape=(8, 8, MAX_LEN / 64), dtype="float32")
 embed3 = TimeDistributed(Encoder2)(input3)
-gru3 = GRU(NUM_FILTERS, recurrent_activation='sigmoid', activation=None, return_sequences=False)(embed3)
+gru3 = GRU(NUM_FILTERS, recurrent_activation='sigmoid', activation=None,
+           return_sequences=False)(embed3)
 preds = Dense(5, activation='softmax')(gru3)
 model = Model(input3, preds)
 
@@ -150,7 +154,6 @@ print(Encoder1.summary())
 print(Encoder2.summary())
 
 print(model.summary())
-
 
 # use adam optimizer
 from keras.optimizers import Adam
@@ -165,7 +168,8 @@ model.compile(loss='categorical_crossentropy',
 from keras.callbacks import ModelCheckpoint
 
 savebestmodel = 'save_model/SRNN(8,2)_yelp2013.h5'
-checkpoint = ModelCheckpoint(savebestmodel, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+checkpoint = ModelCheckpoint(savebestmodel, monitor='val_acc', verbose=1,
+                             save_best_only=True, mode='max')
 callbacks = [checkpoint]
 
 model.fit(np.array(x_train_padded_seqs_split), y_train,
@@ -179,4 +183,5 @@ model.fit(np.array(x_train_padded_seqs_split), y_train,
 from keras.models import load_model
 
 best_model = load_model(savebestmodel)
-print(best_model.evaluate(np.array(x_test_padded_seqs_split), y_test, batch_size=Batch_size))
+print(best_model.evaluate(np.array(x_test_padded_seqs_split), y_test,
+                          batch_size=Batch_size))

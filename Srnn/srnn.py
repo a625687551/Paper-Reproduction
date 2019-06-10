@@ -1,4 +1,4 @@
-#  coding:utf-8
+# -*- coding:utf-8 -*-
 """
 https://arxiv.org/ftp/arxiv/papers/1807/1807.02291.pdf 
 
