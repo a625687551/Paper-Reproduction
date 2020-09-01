@@ -4,16 +4,16 @@
 # @File    : chebynet.py
 
 import os
-
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 import tf_geometric as tfg
 import tensorflow as tf
-import numpy as np
 
+from tqdm import tqdm
 from tensorflow import keras
 from tf_geometric.datasets.cora import CoraDataset
 from tf_geometric.utils.graph_utils import LaplacianMaxEigenvalue
-from tqdm import tqdm
+
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 graph, (train_index, valid_index, test_index) = CoraDataset().load_data()
 
