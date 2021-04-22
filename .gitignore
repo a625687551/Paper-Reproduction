@@ -10,7 +10,7 @@ __pycache__/
 # my setting
 *.csv
 .idea
-
+data/*
 
 # Distribution / packaging
 .Python
